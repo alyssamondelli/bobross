@@ -1,0 +1,123 @@
+---
+title: "PubH 7461 Final Project"
+author: "Alyssa Mondelli"
+date: "`r Sys.Date()`"
+output: 
+  slidy_presentation:
+    theme: united
+---
+
+```{r setup, include=FALSE}
+bobross <- read.csv(file = file.choose(), header = TRUE)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(forcats)
+library(gt)
+library(paletteer)
+library(gtExtras)
+```
+
+## Introduction to Dataset
+
+My dataset is on the paintings of Bob Ross and is available from the [Tidy Tuesday](https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-02-21) github site. This dataset was created by Jared Wilber and contains observations about 403 paintings created over 31 seasons of his show The Joy of Painting including painting titles, what episode they were created in, and what colors and combinations of colors were used in each painting.
+
+Questions to be answered:
+
+- What is the general distribution of number of colors used in a Bob Ross painting?
+- Does the typical number of colors used vary across seasons of the show?
+- What color scheme did Bob use in any given episode?
+- Does Bob have favorite colors?
+
+## Question 1: What is the general distribution of number of colors used in a Bob Ross painting?
+
+```{r, echo = FALSE, message=FALSE}
+bobross %>%
+  ggplot(aes(x=num_colors, fill="brown")) +
+  guides(fill="none") +
+  geom_histogram() +
+  theme_bw() +
+  xlab("Number of Colors Used") +
+  ylab("Number of Paintings") +
+  labs(title=" Overall Distribution of Number of Colors Used in a Bob Ross Painting", caption="Source: Tidy Tuesday Bob Ross dataset from 2/21/2023")
+```
+
+## Question 2: Does the typical number of colors used vary across seasons of the show?
+
+```{r echo=FALSE, message=FALSE}
+
+bobross %>%
+  select(season, episode, num_colors) %>%
+  group_by(season) %>%
+  summarize(mean_colors=mean(num_colors)) %>%
+  arrange(desc(mean_colors)) %>%
+  ggplot(aes(y=mean_colors, x=season)) +
+  geom_line(color="deepskyblue4") +
+  guides(color="none") +
+  labs(title="Mean Colors Used Across Seasons 1-31", caption="Source: Tidy Tuesday Bob Ross dataset from 2/21/2023") +
+  xlab("Season") +
+  ylab("Mean Colors Used") +
+  theme_classic()
+```
+
+## Question 3: What color scheme did Bob use in any given episode?
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+bobross %>%
+  pivot_longer(cols=c(Black_Gesso:Alizarin_Crimson), names_to="colornames", values_to="colorused") %>%
+  mutate(colornames = recode(colornames, Alizarin_Crimson = "Alizarin Crimson", Black_Gesso = "Black Gesso", Bright_Red = "Bright Red", Cadmium_Yellow = "Cadmium Yellow", Phthalo_Green = "Phthalo Green", Prussian_Blue = "Prussian Blue", Sap_Green = "Sap Green", Titanium_White = "Titanium White", Van_Dyke_Brown = "Van Dyke Brown")) %>%
+  filter(colorused != FALSE) %>%
+  filter(season==1)%>%
+  select(season, episode, colornames, colorused) %>%
+  ggplot(aes(x=episode, fill=colornames)) +
+  geom_bar() +
+  labs(title="Color Scheme Used by Episode, Season 1", caption="Source: Tidy Tuesday Bob Ross dataset from 2/21/2023") +
+  xlab("Episode") +
+  ylab("Number of Colors Used") +
+  theme_light() + 
+    scale_fill_manual(values=c("#4e1500", "#000000", "#db0000", "gold1", "seagreen", "royalblue4", "yellowgreen", "whitesmoke", "burlywood4"), name="")
+```
+
+
+## Question 3 continued
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+bobross %>%
+  pivot_longer(cols=c(Black_Gesso:Alizarin_Crimson), names_to="colornames", values_to="colorused") %>%
+  filter(colorused != FALSE) %>%
+  mutate(colornames = recode(colornames, Alizarin_Crimson = "Alizarin Crimson", Black_Gesso = "Black Gesso", Bright_Red = "Bright Red", Burnt_Umber = "Burnt Umber", Cadmium_Yellow = "Cadmium Yellow", Dark_Sienna = "Dark Sienna", Indian_Red = "Indian Red", Indian_Yellow = "Indian Yellow", Liquid_Black = "Liquid Black", Liquid_Clear = "Liquid Clear", Midnight_Black = "Midnight Black", Phthalo_Blue = "Phthalo Blue", Phthalo_Green = "Phthalo Green", Prussian_Blue = "Prussian Blue", Sap_Green = "Sap Green", Titanium_White = "Titanium White", Van_Dyke_Brown = "Van Dyke Brown", Yellow_Ochre = "Yellow Ochre")) %>%
+  select(season, episode, colornames, colorused) %>%
+  ggplot(aes(x=episode, fill=colornames)) +
+  geom_bar() +
+  facet_wrap(~season) +
+  labs(title="Color Scheme Used by Episode, Seasons 1-31", caption="Source: Tidy Tuesday Bob Ross dataset from 2/21/2023") +
+  xlab("Episode") +
+  ylab("Number of Colors Used")  + 
+    scale_fill_manual(values=c("#4e1500", "#000000", "#db0000", "darkorange4", "gold1", "sienna4", "indianred4", "orange1", "gray1", "ghostwhite", "gray2","dodgerblue4", "seagreen", "royalblue4", "yellowgreen", "whitesmoke", "burlywood4", "darkgoldenrod1"), name="")
+  
+```
+
+## Question 4: Does Bob have favorite colors?
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+bobross %>%
+  pivot_longer(cols=c(Black_Gesso:Alizarin_Crimson), names_to="colornames", values_to="colorused") %>%
+  select(season, episode, colornames, colorused) %>%
+  group_by(colornames) %>%
+  mutate(colornames = recode(colornames, Alizarin_Crimson = "Alizarin Crimson", Black_Gesso = "Black Gesso", Bright_Red = "Bright Red", Burnt_Umber = "Burnt Umber", Cadmium_Yellow = "Cadmium Yellow", Dark_Sienna = "Dark Sienna", Indian_Red = "Indian Red", Indian_Yellow = "Indian Yellow", Liquid_Black = "Liquid Black", Liquid_Clear = "Liquid Clear", Midnight_Black = "Midnight Black", Phthalo_Blue = "Phthalo Blue", Phthalo_Green = "Phthalo Green", Prussian_Blue = "Prussian Blue", Sap_Green = "Sap Green", Titanium_White = "Titanium White", Van_Dyke_Brown = "Van Dyke Brown", Yellow_Ochre = "Yellow Ochre")) %>%
+  summarize(total_colorused = sum(colorused)) %>%
+  arrange(desc(total_colorused)) %>%
+  gt() %>%
+  cols_label(colornames = "Color Name", total_colorused = "Times Used") %>%
+  tab_header(title = "Paint Colors Used by Bob Ross",
+             subtitle = "n=403 paintings") %>%
+  tab_source_note(source_note = "Source: Tidy Tuesday Bob Ross dataset from 2/21/2023") %>%
+  gt_color_rows(columns=c("total_colorused"), 
+                palette="futurevisions::cancri", domain = NULL,
+                pal_type=c("continuous"))
+
+```
+
+## Conclusions
+
+- A typical Bob Ross painting contains between 10 to 13 colors, with a minimum of 1 and a maximum of 15. 
+- The distribution of number of colors used varies widely between seasons, but the mean number of colors used per season is typically between 10 and 11.5 colors per painting. 
+- Bob's five most frequently used colors (after white) are Alizarin Crimson, Van Dyke Brown, Cadmium Yellow, Yellow Ochre, and Phthalo Blue.
