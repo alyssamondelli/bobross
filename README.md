@@ -1,3 +1,5 @@
+![image](https://github.com/alyssamondelli/bobross/assets/161888844/5b2a47e8-52f9-4b33-ab47-e308a3543bd4)
+
 # PubH 7461 Final Project
 ### Alyssa Mondelli
 ### 2023-12-08
@@ -16,3 +18,5 @@ Does the average number of colors used vary across seasons of the show?
 What color scheme did Bob use in any given episode?
 
 Does Bob have favorite colors?
+
+
